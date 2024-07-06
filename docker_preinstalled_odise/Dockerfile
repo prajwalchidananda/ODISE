@@ -50,6 +50,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mpich \
     && rm -rf /var/lib/apt/lists/*
 
+# Install git lfs
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+RUN apt-get install -y git-lfs
+RUN git lfs install
+
+
+RUN curl https://rclone.org/install.sh | bash
+
+# Set timezone
+RUN ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
+
+# Set CUDA_ROOT
+RUN export CUDA_HOME="/usr/local/cuda"
+
 # Install Miniconda
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
@@ -64,26 +78,24 @@ RUN conda create -n odise python=3.9 && \
 ENV PATH /opt/conda/envs/odise/bin:$PATH
 ENV CONDA_DEFAULT_ENV odise
 
-# Install PyTorch, torchvision, and CUDA support
-RUN conda install pytorch=1.13.1 torchvision=0.14.1 pytorch-cuda=11.6 -c pytorch -c nvidia && \
-    conda install -c "nvidia/label/cuda-11.6.1" libcusolver-dev
-
-# Set environment variables for CUDA
-ENV CUDA_HOME=/usr/local/cuda-11.6
-ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:$LD_LIBRARY_PATH
-ENV PATH=${CUDA_HOME}/bin:$PATH
-
-# Clone the ODISE repository
-RUN git clone https://github.com/NVlabs/ODISE.git /app/ODISE
 
 # Set the working directory to the ODISE directory
-WORKDIR /app/ODISE
+RUN conda install pytorch=1.13.1 torchvision=0.14.1 pytorch-cuda=11.6 -c pytorch -c nvidia -y
+RUN conda install -c "nvidia/label/cuda-11.6.1" libcusolver-dev -y
+RUN git clone https://github.com/NVlabs/ODISE.git /app/ODISE
 
 # Install the ODISE package
+WORKDIR /app/ODISE
 RUN pip install -e .
 
 # Install xformers
 RUN pip install xformers==0.0.16
+
+# Downgrade pillow to 9.5.0 to avoid issues with detectron2
+RUN pip install pillow==9.5.0
+
+# Downgrade numpy to 1.23.1 to avoid issues with np.bool
+RUN pip install numpy==1.23.1
 
 # Set the entrypoint to bash
 ENTRYPOINT ["bash"]
