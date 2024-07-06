@@ -97,5 +97,4 @@ RUN pip install pillow==9.5.0
 # Downgrade numpy to 1.23.1 to avoid issues with np.bool
 RUN pip install numpy==1.23.1
 
-# Set the entrypoint to bash
-ENTRYPOINT ["bash"]
+RUN chmod +x /opt/conda/envs/odise/bin/python

@@ -187,6 +187,7 @@ class VisualizationDemo(object):
             vis_output = visualizer.draw_panoptic_seg(
                 panoptic_seg.to(self.cpu_device), segments_info
             )
+            predictions["binary_mask"] = panoptic_seg[0] != 0
         else:
             if "sem_seg" in predictions:
                 vis_output = visualizer.draw_sem_seg(
@@ -286,6 +287,11 @@ if __name__ == "__main__":
         "--output",
         help="A file or directory to save output visualizations. "
         "If not given, will show output in an OpenCV window.",
+    )
+    parser.add_argument(
+        "--binary_mask",
+        action="store_true",
+        help="output binary mask instead of panoptic segmentation",
     )
     parser.add_argument(
         "--vocab",
@@ -422,7 +428,11 @@ if __name__ == "__main__":
                     else:
                         assert len(args.input) == 1, "Please specify a directory with args.output"
                         out_filename = args.output
-                    visualized_output.save(out_filename)
+                    if args.binary_mask:
+                        binary_mask = predictions["binary_mask"]
+                        cv2.imwrite(out_filename, binary_mask.numpy().astype(np.uint8) * 255)
+                    else:
+                        visualized_output.save(out_filename)
                 else:
                     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
                     cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
