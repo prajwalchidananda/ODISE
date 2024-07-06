@@ -187,7 +187,7 @@ class VisualizationDemo(object):
             vis_output = visualizer.draw_panoptic_seg(
                 panoptic_seg.to(self.cpu_device), segments_info
             )
-            predictions["binary_mask"] = panoptic_seg[0] != 0
+            predictions["binary_mask"] = panoptic_seg != 0
         else:
             if "sem_seg" in predictions:
                 vis_output = visualizer.draw_sem_seg(

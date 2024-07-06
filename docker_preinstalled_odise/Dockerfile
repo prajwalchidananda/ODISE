@@ -85,7 +85,7 @@ RUN conda install -c "nvidia/label/cuda-11.6.1" libcusolver-dev -y
 RUN git clone https://github.com/prajwalchidananda/ODISE.git /app/ODISE && \
     cd /app/ODISE && \
     git checkout dust3r_docker && \
-    git checkout 1b3b3b3
+    git checkout 8b6fb5b
 
 # Install the ODISE package
 WORKDIR /app/ODISE
