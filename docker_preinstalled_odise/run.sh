@@ -3,21 +3,39 @@
 # Ensure the script stops if any command fails
 set -e
 
-# Build the Docker image
-docker build -t seg_image .
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <input_image_path> <output_image_path> <vocabulary>"
+    exit 1
+fi
 
-# Run the Docker container with the specified command
-echo "Running the Docker container..."
-docker run --rm -v $(pwd)/io:/app/ODISE/io seg_image \
-    python demo/demo.py --input $1 --output $2 --vocab "$3" --label "" --binary_mask
+# Define input arguments
+INPUT_FILE=$1
+OUTPUT_FILE=$2
+VOCABULARY=$3
+
+# Define the Docker image and container names
+IMAGE_NAME="seg_image"
+CONTAINER_NAME="seg_container"
+
+# Build the Docker image
+docker build -t $IMAGE_NAME .
+
+# Check if the container is already running
+if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+    echo "Container is already running. Executing command..."
+else
+    # Run the Docker container in detached mode
+    docker run -d --name $CONTAINER_NAME -v $(pwd)/io:/app/ODISE/io $IMAGE_NAME tail -f /dev/null
+fi
+
+# Print input arguments
+echo "Input arguments:"
+echo "Input file: $INPUT_FILE"
+echo "Output file: $OUTPUT_FILE"
+echo "Vocabulary: $VOCABULARY"
+
+# Execute the command in the running container
+docker exec $CONTAINER_NAME python demo/demo.py --input $INPUT_FILE --output $OUTPUT_FILE --vocab "$VOCABULARY" --label "" --binary_mask
 
 echo "Done!"
-
-#docker run --rm -v $(pwd)/io:/app/ODISE/io seg_image \
-#    bash -c "source /opt/conda/bin/activate odise && \
-#        python demo/demo.py \
-#            --input /app/ODISE/input/$1 \
-#            --output /app/ODISE/input/$2 \
-#            --vocab \"$3\" \
-#            --binary_mask"
-#

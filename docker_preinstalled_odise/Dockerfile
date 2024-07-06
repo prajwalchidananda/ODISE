@@ -82,7 +82,7 @@ ENV CONDA_DEFAULT_ENV odise
 # Set the working directory to the ODISE directory
 RUN conda install pytorch=1.13.1 torchvision=0.14.1 pytorch-cuda=11.6 -c pytorch -c nvidia -y
 RUN conda install -c "nvidia/label/cuda-11.6.1" libcusolver-dev -y
-RUN git clone https://github.com/NVlabs/ODISE.git /app/ODISE
+RUN git clone --branch dust3r_docker https://github.com/prajwalchidananda/ODISE.git /app/ODISE
 
 # Install the ODISE package
 WORKDIR /app/ODISE

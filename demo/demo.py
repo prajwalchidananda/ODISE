@@ -429,8 +429,8 @@ if __name__ == "__main__":
                         assert len(args.input) == 1, "Please specify a directory with args.output"
                         out_filename = args.output
                     if args.binary_mask:
-                        binary_mask = predictions["binary_mask"]
-                        cv2.imwrite(out_filename, binary_mask.numpy().astype(np.uint8) * 255)
+                        binary_mask = predictions["binary_mask"].cpu().numpy().astype(np.uint8)
+                        cv2.imwrite(out_filename, binary_mask * 255)
                     else:
                         visualized_output.save(out_filename)
                 else:
